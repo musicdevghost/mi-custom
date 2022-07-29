@@ -109,7 +109,7 @@ class VoxVerb {
       // Main reverb loop.
       c.Load(apout);
       // c.Interpolate(del2, 4680.0f, LFO_2, 100.0f, krt);
-      c.Interpolate(del2, delay_time_, LFO_2);
+      c.Interpolate(del2, delay_time_, krt);
       c.Lp(lp_1, klp);
       c.Read(dap1a TAIL, -kap);
       c.WriteAllPass(dap1a, kap);
