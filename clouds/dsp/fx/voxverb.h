@@ -44,7 +44,8 @@ class VoxVerb {
     engine_.Init(buffer);
     engine_.SetLFOFrequency(LFO_1, 0.5f / 32000.0f);
     engine_.SetLFOFrequency(LFO_2, 0.3f / 32000.0f);
-    lp_ = 0.7f;
+    lp_ = 1.0f;
+    hp_= 0.0f;
     diffusion_ = 0.625f;
   }
   
@@ -77,12 +78,16 @@ class VoxVerb {
 
     const float kap = diffusion_;
     const float klp = lp_;
+    const float khp = hp_;
     const float krt = reverb_time_;
     const float amount = amount_;
     const float gain = input_gain_;
 
     float lp_1 = lp_decay_1_;
     float lp_2 = lp_decay_2_;
+
+    float hp_1 = hp_decay_1_;
+    float hp_2 = hp_decay_2_;
 
     while (size--) {
       float wet;
@@ -111,6 +116,7 @@ class VoxVerb {
       // c.Interpolate(del2, 4680.0f, LFO_2, 100.0f, krt);
       c.Interpolate(del2, delay_time_, krt);
       c.Lp(lp_1, klp);
+      c.Hp(hp_1, khp);
       c.Read(dap1a TAIL, -kap);
       c.WriteAllPass(dap1a, kap);
       c.Read(dap1b TAIL, kap);
@@ -124,6 +130,7 @@ class VoxVerb {
       // c.Interpolate(del1, 4450.0f, LFO_1, 50.0f, krt);
       c.Read(del1 TAIL, krt);
       c.Lp(lp_2, klp);
+      c.Hp(hp_1, khp);
       c.Read(dap2a TAIL, kap);
       c.WriteAllPass(dap2a, -kap);
       c.Read(dap2b TAIL, -kap);
@@ -138,6 +145,8 @@ class VoxVerb {
     
     lp_decay_1_ = lp_1;
     lp_decay_2_ = lp_2;
+    hp_decay_1_ = hp_1;
+    hp_decay_2_ = hp_2;
   }
   
   inline void set_delay_time(float time) {
@@ -163,6 +172,10 @@ class VoxVerb {
   inline void set_lp(float lp) {
     lp_ = lp;
   }
+
+  inline void set_hp(float hp) {
+    hp_ = hp;
+  }
   
  private:
   typedef FxEngine<16384, FORMAT_12_BIT> E;
@@ -173,9 +186,12 @@ class VoxVerb {
   float reverb_time_;
   float diffusion_;
   float lp_;
+  float hp_;
   
   float lp_decay_1_;
   float lp_decay_2_;
+  float hp_decay_1_;
+  float hp_decay_2_;
 
   float delay_time_;
   
